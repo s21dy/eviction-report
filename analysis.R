@@ -6,14 +6,31 @@ library("tidyr")
 library("ggmap")
 
 # Load in your data
-
+evictions <- read.csv("data/Eviction_Notices.csv", stringsAsFactors = FALSE)
 # Compute some values of interest and store them in variables for the report
 
 # How many evictions were there?
+num_evictions <- nrow(evictions)
+num_feature <- ncol(evictions)
 
 # Create a table (data frame) of evictions by zip code (sort descending)
+by_zip <- evictions %>% 
+  group_by(Eviction.Notice.Source.Zipcode) %>% 
+  count() %>% 
+  arrange(-n) %>% 
+  ungroup() %>%  # if want to get the top ten
+  top_n(10, wt = n)
 
 # Create a plot of the number of evictions each month in the dataset
+by_month <- evictions %>% 
+  mutate(date = as.Date(File.Date, format = "%m/%d/%y")) %>% 
+  mutate(month = floor_date(date, unit = "month")) %>% 
+  group_by(month) %>% 
+  count()
+  
+month_plot <- ggplot(data = by_month) +
+  geom_line(mapping = aes(x = month, y = n), color = "blue", alpha = .5) +
+  labs(x = "Date", y = "Number of Ecivtions", title = "Evictions over times in SF")
 
 # Store plot in a variable
 
